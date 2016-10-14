@@ -7,7 +7,7 @@ const DATA_FILE = "data.txt";
 var dataFilePath = path.resolve(__dirname + path.sep + DATA_FILE);
 
 var hostname = 'localhost';
-var port = 3000;
+var port = 8081;
 
 var app = express();
 var router = express.Router();
@@ -21,6 +21,7 @@ var getTime = function(req, res, next) {
         if (err)
         {
             res.status(500).send("Internal error occurred.");
+            throw err;
         }
         else
         {
@@ -29,6 +30,7 @@ var getTime = function(req, res, next) {
                 if (err)
                 {
                     res.status(500).send("Internal error occurred.");
+                    throw err;
                 }
                 else
                 {
@@ -57,6 +59,7 @@ var setTime = function(req, res, next) {
         if (isNaN(date.getTime()))
         {
             res.status(400).send("Parameter 'time' must be a unix timestamp in seconds.");
+            throw err;
         }
         else
         {
@@ -65,6 +68,7 @@ var setTime = function(req, res, next) {
                 if (err)
                 {
                     res.status(500).send("Internal error occurred.");
+                    throw err;
                 }
                 else
                 {
@@ -87,6 +91,7 @@ var dispTime = function(req, res, next) {
         if (err)
         {
             res.status(500).send("Internal error occurred.");
+            throw err;
         }
         else
         {
