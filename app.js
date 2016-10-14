@@ -108,7 +108,7 @@ router.get('/', dispTime)
     .get('/set_time.php', setTime);
 
 
-app.use(morgan('dev'));
+app.use(morgan('combined'));
 
 app.use("/", router);
 app.listen(port, hostname, function(){
