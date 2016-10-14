@@ -95,10 +95,65 @@ var dispTime = function(req, res, next) {
         }
         else
         {
-            res.writeHead(200, {
-                'Content-Type': 'text/plain'
+            fs.stat(dataFilePath, function(err, stats) {
+                if (err) {
+                    res.status(500).send("Internal error occurred.");
+                    throw err;
+                }
+                else
+                {
+                    res.writeHead(200, {
+                        'Content-Type': 'text/plain'
+                    });
+
+                    var alarmDate = new Date(String(data) * 1000);
+                    var modifiedDate = stats.mtime;
+
+                    res.write("Next alarm clock:\n");
+                    res.write(alarmDate.toString());
+                    res.write("\n\n[Last updated ");
+
+                    var millisecDiff = Date.now() - stats.mtime;
+
+                    if (millisecDiff < 60*1000)
+                    {
+                        res.end("just now]")
+                    }
+                    else
+                    {
+                        var days = millisecDiff / 1000 / 60 / 60 / 24;
+                        millisecDiff -= Math.floor(days) * 1000 * 60 * 60 * 24;
+                        var hh = millisecDiff / 1000 / 60 / 60;
+                        millisecDiff -= Math.floor(hh) * 1000 * 60 * 60;
+                        var mm = millisecDiff / 1000 / 60;
+                        millisecDiff -= Math.floor(mm) * 1000 * 60;
+
+                        var num, unit;
+
+                        if (Math.round(days) >= 1)
+                        {
+                            num = days;
+                            unit = "day";
+                        }
+                        else if (Math.round(hh) >= 1)
+                        {
+                            num = hh;
+                            unit = "hour";
+                        }
+                        else
+                        {
+                            num = mm;
+                            unit = "minute";
+                        }
+
+                        num = Math.round(num);
+                        if (num > 1)
+                            unit = unit + "s";
+
+                        res.end(num + " " + unit + " ago]")
+                    }
+                }
             });
-            res.end(new Date(String(data)*1000).toString());
         }
     });
 };
