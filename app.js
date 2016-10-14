@@ -109,8 +109,16 @@ var dispTime = function(req, res, next) {
                     var alarmDate = new Date(String(data) * 1000);
                     var modifiedDate = stats.mtime;
 
-                    res.write("Next alarm clock:\n");
-                    res.write(alarmDate.toString());
+                    if (data == '0')
+                    {
+                        res.write("No alarm clocks are set.")
+                    }
+                    else
+                    {
+                        res.write("Next alarm clock:\n");
+                        res.write(alarmDate.toString());
+                    }
+
                     res.write("\n\n[Last updated ");
 
                     var millisecDiff = Date.now() - stats.mtime;
