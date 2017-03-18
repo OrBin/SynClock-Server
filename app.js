@@ -174,7 +174,7 @@ function isLoggedIn(req, res, next) {
         return next();
 
     // If they aren't, redirect them to the authentication page
-    res.redirect('/auth/google');
+    res.redirect('./auth/google');
 }
 
 // required for passport session
