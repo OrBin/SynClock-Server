@@ -20,7 +20,8 @@ module.exports = function(passport) {
 
             process.nextTick(function() {
 
-                if (configAuth.allowedUsers.includes(profile.emails[0].value))
+				// If the current user's email is authorized to go on
+                if (configAuth.allowedUsers.indexOf(profile.emails[0].value) != -1)
                 {
                     return done(null, {
                         name: profile.displayName,

@@ -197,8 +197,8 @@ router.get('/auth/google',
 // the callback after google has authenticated the user
 router.get('/auth/google/callback',
     passport.authenticate('google', {
-        successRedirect : '/disp',
-        failureRedirect : '/forbidden'
+        successRedirect : '../../disp',
+        failureRedirect : '../../forbidden'
     }));
 
 router.get('/', isLoggedIn, dispTime)
