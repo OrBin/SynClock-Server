@@ -177,6 +177,17 @@ function isLoggedIn(req, res, next) {
     res.redirect('./auth/google');
 }
 
+// Route middleware to make sure a user is logged in
+function isLoggedInWithToken(req, res, next) {
+
+    // If user is authenticated in the session, carry on
+    if (req.isAuthenticated())
+        return next();
+
+    // If they aren't, redirect them to the authentication page
+    res.redirect('./auth/googletoken');
+}
+
 // required for passport session
 app.use(session({
     secret: require('./config/auth').sessionSecret,
@@ -194,23 +205,43 @@ router.get('/auth/google',
         scope : ['profile', 'email']
     }));
 
+var GoogleTokenStrategy = require('./passport-token')(passport);
+app.use(passport.initialize());
+app.use(passport.session());
+
+router.get('/auth/googletoken',
+    passport.authenticate('google-id-token'),
+    function (req, res) {
+        res.send(req.user ? 200 : 401);
+    }
+);
+
+
 // the callback after google has authenticated the user
 router.get('/auth/google/callback',
     passport.authenticate('google', {
-        successRedirect : '../../disp',
+        successRedirect : '../../disp', // TODO check if this line should be removed
+        failureRedirect : '../../forbidden'
+    }));
+
+
+// the callback after google has authenticated the user
+router.get('/auth/googletoken/callback',
+    passport.authenticate('google', {
+        successRedirect : '../../disp', // TODO check if this line should be removed
         failureRedirect : '../../forbidden'
     }));
 
 router.get('/', isLoggedIn, dispTime)
 
-    .get('/get', isLoggedIn, getTime)
-    .get('/get_time.php', isLoggedIn, getTime) // PHP path for backwards compatibility
+    .get('/get', isLoggedInWithToken, getTime)
+    .get('/get_time.php', isLoggedInWithToken, getTime) // PHP path for backwards compatibility
 
     .get('/disp', isLoggedIn, dispTime)
     .get('/disp_time.php', isLoggedIn, dispTime) // PHP path for backwards compatibility
 
-    .get('/set', setTime)
-    .get('/set_time.php', setTime) // PHP path for backwards compatibility
+    .get('/set', isLoggedInWithToken, setTime)
+    .get('/set_time.php', isLoggedInWithToken, setTime) // PHP path for backwards compatibility
 
     .get('/forbidden', function(req, res, next)
     {
