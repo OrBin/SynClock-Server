@@ -235,14 +235,8 @@ router.get('/auth/googletoken/callback',
 router.get('/', isLoggedIn, dispTime)
 
     .get('/get', isLoggedInWithToken, getTime)
-    .get('/get_time.php', isLoggedInWithToken, getTime) // PHP path for backwards compatibility
-
     .get('/disp', isLoggedIn, dispTime)
-    .get('/disp_time.php', isLoggedIn, dispTime) // PHP path for backwards compatibility
-
     .get('/set', isLoggedInWithToken, setTime)
-    .get('/set_time.php', isLoggedInWithToken, setTime) // PHP path for backwards compatibility
-
     .get('/forbidden', function(req, res, next)
     {
         res.status(403).end("403 Forbidden\nYou are not authorized to access this page!")
