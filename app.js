@@ -220,7 +220,7 @@ router.get('/auth/googletoken',
 // the callback after google has authenticated the user
 router.get('/auth/google/callback',
     passport.authenticate('google', {
-        successRedirect : '../../disp', // TODO check if this line should be removed
+        successRedirect : '../../disp',
         failureRedirect : '../../forbidden'
     }));
 
@@ -228,7 +228,7 @@ router.get('/auth/google/callback',
 // the callback after google has authenticated the user
 router.get('/auth/googletoken/callback',
     passport.authenticate('google', {
-        successRedirect : '../../disp', // TODO check if this line should be removed
+        successRedirect : '../../disp',
         failureRedirect : '../../forbidden'
     }));
 
