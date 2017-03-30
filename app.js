@@ -2,6 +2,8 @@ var express = require('express');
 var morgan = require('morgan');
 var fs = require('fs');
 var path = require('path');
+var passport = require('passport');
+var session = require('express-session');
 
 const DATA_FILE = "data.txt";
 var dataFilePath = path.resolve(__dirname + path.sep + DATA_FILE);
@@ -11,8 +13,6 @@ var port = 8081;
 
 var app = express();
 var router = express.Router();
-
-/* GET home page. */
 
 var getTime = function(req, res, next) {
 
@@ -166,19 +166,86 @@ var dispTime = function(req, res, next) {
     });
 };
 
-router.get('/', dispTime)
-    .get('/get', getTime)
-    .get('/disp', dispTime)
-    .get('/set', setTime)
-    // PHP paths for backwards compatibility
-    .get('/get_time.php', getTime)
-    .get('/disp_time.php', dispTime)
-    .get('/set_time.php', setTime);
+// Route middleware to make sure a user is logged in
+function isLoggedIn(req, res, next) {
 
+    // If user is authenticated in the session, carry on
+    if (req.isAuthenticated())
+        return next();
+
+    // If they aren't, redirect them to the authentication page
+    res.redirect('./auth/google');
+}
+
+// Route middleware to make sure a user is logged in
+function isLoggedInWithToken(req, res, next) {
+
+    // If user is authenticated in the session, carry on
+    if (req.isAuthenticated())
+        return next();
+
+    // If they aren't, redirect them to the authentication page
+    res.redirect('./auth/googletoken');
+}
+
+// required for passport session
+app.use(session({
+    secret: require('./config/auth').sessionSecret,
+    saveUninitialized: true,
+    resave: true
+}));
+
+var GoogleStrategy = require('./passport')(passport);
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+router.get('/auth/google',
+    passport.authenticate('google', {
+        scope : ['profile', 'email']
+    }));
+
+var GoogleTokenStrategy = require('./passport-token')(passport);
+app.use(passport.initialize());
+app.use(passport.session());
+
+router.get('/auth/googletoken',
+    passport.authenticate('google-id-token'),
+    function (req, res) {
+        res.send(req.user ? 200 : 401);
+    }
+);
+
+
+// the callback after google has authenticated the user
+router.get('/auth/google/callback',
+    passport.authenticate('google', {
+        successRedirect : '../../disp',
+        failureRedirect : '../../forbidden'
+    }));
+
+
+// the callback after google has authenticated the user
+router.get('/auth/googletoken/callback',
+    passport.authenticate('google', {
+        successRedirect : '../../disp',
+        failureRedirect : '../../forbidden'
+    }));
+
+router.get('/', isLoggedIn, dispTime)
+
+    .get('/get', isLoggedInWithToken, getTime)
+    .get('/disp', isLoggedIn, dispTime)
+    .get('/set', isLoggedInWithToken, setTime)
+    .get('/forbidden', function(req, res, next)
+    {
+        res.status(403).end("403 Forbidden\nYou are not authorized to access this page!")
+    });
 
 app.use(morgan('combined'));
 
 app.use("/", router);
+
 app.listen(port, hostname, function(){
     console.log(`Server running at http://${hostname}:${port}/`);
 });

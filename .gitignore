@@ -103,3 +103,4 @@ fabric.properties
 
 # Project-specific additions
 data.txt
+config/auth.js
